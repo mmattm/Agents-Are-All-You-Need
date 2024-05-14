@@ -20,13 +20,12 @@ export const openai = new OpenAI({
 });
 
 export async function setPuppeteer(options = {}) {
-
   const {
     windowWidth = 960,
     windowHeight = 960,
     args = [],
     puppeteerOptions = {},
-  } = options
+  } = options;
 
   const browser = await puppeteer.launch({
     headless: false,
@@ -38,7 +37,10 @@ export async function setPuppeteer(options = {}) {
       "--enable-automation",
       "--disable-blink-features=AutomationControlled",
     ],
-    args: ["--window-size=" + windowWidth + "," + (windowHeight + 88) + "", ...args],
+    args: [
+      "--window-size=" + windowWidth + "," + (windowHeight + 88) + "",
+      ...args,
+    ],
     ignoreHTTPSErrors: true,
     ...puppeteerOptions,
   });
@@ -59,7 +61,7 @@ export async function generate_speech(
   const speechFile = path.resolve("./" + filename);
   const mp3 = await openai.audio.speech.create({
     model: "tts-1",
-    voice: "onyx",
+    voice: voice,
     input: text,
   });
   const buffer = Buffer.from(await mp3.arrayBuffer());
