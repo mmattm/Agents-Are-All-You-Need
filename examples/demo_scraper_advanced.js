@@ -9,7 +9,7 @@ import {
 const timeout = 3000;
 
 (async () => {
-  console.log("hello world");
+  console.clear();
 
   const messages = [
     {
