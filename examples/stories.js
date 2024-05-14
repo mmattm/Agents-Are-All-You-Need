@@ -108,7 +108,7 @@ const timeout = 3000;
         flashStyle: term.brightWhite,
         delay: 50,
       }),
-      generate_speech(reason, openai),
+      generate_speech(reason),
     ]);
 
     // NEXT STORY

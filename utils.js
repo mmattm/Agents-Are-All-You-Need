@@ -45,7 +45,11 @@ export async function setPuppeteer() {
   return { page: page, browser: browser };
 }
 
-export async function generate_speech(text, openai, filename = "speech.mp3") {
+export async function generate_speech(
+  text,
+  voice = "onyx",
+  filename = "speech.mp3"
+) {
   const speechFile = path.resolve("./" + filename);
   const mp3 = await openai.audio.speech.create({
     model: "tts-1",
@@ -143,9 +147,9 @@ export async function highlight_links(page) {
             rect.top >= 0 &&
             rect.left >= 0 &&
             rect.bottom <=
-            (window.innerHeight || document.documentElement.clientHeight) &&
+              (window.innerHeight || document.documentElement.clientHeight) &&
             rect.right <=
-            (window.innerWidth || document.documentElement.clientWidth)
+              (window.innerWidth || document.documentElement.clientWidth)
           );
         }
 

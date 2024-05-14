@@ -127,7 +127,7 @@ const locations = [
         flashStyle: term.brightWhite,
         delay: 40,
       }),
-      generate_speech(thought, openai),
+      generate_speech(thought),
     ]);
 
     await page.click(".ZDEBfc");
