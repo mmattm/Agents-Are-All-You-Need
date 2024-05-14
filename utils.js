@@ -19,9 +19,14 @@ export const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
 });
 
-export async function setPuppeteer() {
-  const windowWidth = 960;
-  const windowHeight = 960;
+export async function setPuppeteer(options = {}) {
+
+  const {
+    windowWidth = 960,
+    windowHeight = 960,
+    args = [],
+    puppeteerOptions = {},
+  } = options
 
   const browser = await puppeteer.launch({
     headless: false,
@@ -33,8 +38,9 @@ export async function setPuppeteer() {
       "--enable-automation",
       "--disable-blink-features=AutomationControlled",
     ],
-    args: ["--window-size=" + windowWidth + "," + (windowHeight + 88) + ""],
+    args: ["--window-size=" + windowWidth + "," + (windowHeight + 88) + "", ...args],
     ignoreHTTPSErrors: true,
+    ...puppeteerOptions,
   });
 
   const pages = await browser.pages();
@@ -42,7 +48,7 @@ export async function setPuppeteer() {
 
   await useActionViz(page);
 
-  return { page: page, browser: browser };
+  return { page, browser };
 }
 
 export async function generate_speech(text, openai, filename = "speech.mp3") {
