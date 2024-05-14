@@ -53,6 +53,20 @@ export async function setPuppeteer(options = {}) {
   return { page, browser };
 }
 
+export async function newWindow(browser, options) {
+  const client = await browser.target().createCDPSession();
+  const { targetId } = await client.send('Target.createTarget', { url: 'about:blank', newWindow: true, background: false, ...options });
+  const target = await browser.waitForTarget(target => target._targetId === targetId);
+  const page = await target.page();
+
+  const setBounds = async (bounds) => {
+    const { windowId } = await client.send('Browser.getWindowForTarget', { targetId })
+    client.send('Browser.setWindowBounds', { windowId, bounds: { windowState: 'normal', ...bounds } });
+  }
+
+  return { page, client, setBounds };
+}
+
 export async function generate_speech(
   text,
   voice = "onyx",
