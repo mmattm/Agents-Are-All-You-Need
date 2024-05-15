@@ -17,7 +17,29 @@ export async function useScreenshare({ recordFrom, streamTo }) {
         const ctx = canvas.getContext('2d');
         const img = new Image();
 
-        navigator.mediaDevices.getUserMedia = async () => canvas.captureStream();
+
+        const canvasDevice = {
+            deviceId: "fake-camera",
+            kind: "videoinput",
+            label: "Fake Camera",
+            groupId: "default"
+        }
+        canvasDevice.__proto__ = MediaDeviceInfo.prototype;
+        const enumerateDevices = navigator.mediaDevices.enumerateDevices
+        navigator.mediaDevices.enumerateDevices = async function () {
+            const oldDevices = await enumerateDevices.call(navigator.mediaDevices)
+            return [canvasDevice, ...oldDevices];
+        }
+        // canvas.captureStream();
+        const getUserMedia = navigator.mediaDevices.getUserMedia
+        navigator.mediaDevices.getUserMedia = async function () {
+            const [constraints] = arguments;
+            const isChosen = constraints.video.deviceId.exact === canvasDevice.deviceId
+            if (constraints.video && isChosen)
+                return canvas.captureStream();
+            const stream = await getUserMedia.apply(navigator.mediaDevices, arguments);
+            return stream;
+        }
 
         async function updateImg() {
             const frame = await window.getFrame();
