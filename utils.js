@@ -48,7 +48,7 @@ export async function setPuppeteer(options = {}) {
 
   const pages = await browser.pages();
   const page = pages[0];
-
+  await page.setBypassCSP(true); // bypass Content Security Policy
   await useActionViz(page);
 
   return { page, browser };
@@ -65,7 +65,28 @@ export async function newWindow(browser, options) {
     client.send('Browser.setWindowBounds', { windowId, bounds: { windowState: 'normal', ...bounds } });
   }
 
+  await page.setBypassCSP(true); // bypass Content Security Policy
+
   return { page, client, setBounds };
+}
+
+export /*async*/ function animate(fn, { fps = 60, customData = {} } = {}) {
+  return new Promise((resolve) => {
+    const start = Date.now();
+    let frame;
+    let frameCount = 0;
+    let interval = 1000 / fps;
+
+    const update = async () => {
+      const time = Date.now() - start;
+      const playing = await fn({ time, frameCount, customData });
+      frameCount++;
+      if (playing) return setTimeout(update, interval);
+      resolve();
+    }
+
+    update();
+  })
 }
 
 export async function generate_speech(
