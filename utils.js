@@ -8,6 +8,7 @@ import inquirer from "inquirer";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import useActionViz from "./utils.actionviz.js";
+import { match } from "assert";
 
 puppeteer.use(StealthPlugin());
 
@@ -136,6 +137,57 @@ export async function sleep(ms) {
   return await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export async function findClosestElement(page, { multiple = false, cssSelector = "*", containText = "", ignoreInvisible = true, exactMatch = false }) {
+
+  if (!exactMatch)
+    containText = containText.toLowerCase().trim();
+
+  const elems = await page.$$(cssSelector)
+
+  function getElem(e, { containText, ignoreInvisible, exactMatch }) {
+
+    let text = e.outerHTML;
+
+    if (!exactMatch)
+      text = text.toLowerCase()
+
+    if (ignoreInvisible && !e.checkVisibility()) return;
+    if (!text.includes(containText)) return;
+
+    let deepness = 0;
+    let parent = e.parentElement;
+    while (parent) {
+      deepness++;
+      parent = parent.parentElement;
+    }
+
+    return { domDeepness: deepness, text };
+  }
+
+  let match = elems.map(async (e) => {
+
+    const res = await e.evaluate(getElem, { containText, ignoreInvisible, exactMatch });
+
+    if (!res) return;
+
+    return { domDeepness: res.domDeepness, elem: e }
+  })
+
+  match = await Promise.all(match);
+  match = match.filter(Boolean);
+  match = match.sort((a, b) => b.domDeepness - a.domDeepness);
+  match = match.map((m) => m.elem);
+
+  if (multiple) return match;
+
+
+  match[0].evaluate((e) => {
+    console.log(e);
+  });
+
+  return match[0];
+}
+
 export async function highlight_links(page) {
   await page.evaluate(() => {
     document.querySelectorAll("[gpt-link-text]").forEach((e) => {
@@ -169,9 +221,9 @@ export async function highlight_links(page) {
             rect.top >= 0 &&
             rect.left >= 0 &&
             rect.bottom <=
-              (window.innerHeight || document.documentElement.clientHeight) &&
+            (window.innerHeight || document.documentElement.clientHeight) &&
             rect.right <=
-              (window.innerWidth || document.documentElement.clientWidth)
+            (window.innerWidth || document.documentElement.clientWidth)
           );
         }
 
