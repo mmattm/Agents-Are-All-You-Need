@@ -34,9 +34,13 @@ export async function useScreenshare({ recordFrom, streamTo }) {
         const getUserMedia = navigator.mediaDevices.getUserMedia
         navigator.mediaDevices.getUserMedia = async function () {
             const [constraints] = arguments;
-            const isChosen = constraints.video.deviceId.exact === canvasDevice.deviceId
-            if (constraints.video && isChosen)
-                return canvas.captureStream();
+            try {
+                const isChosen = constraints.video.deviceId.exact === canvasDevice.deviceId
+                if (isChosen)
+                    return canvas.captureStream();
+            } catch (error) {
+
+            }
             const stream = await getUserMedia.apply(navigator.mediaDevices, arguments);
             return stream;
         }
