@@ -1,5 +1,5 @@
 import { setPuppeteer, sleep, newWindow, findClosestElement } from "../utils.js";
-import cssXPath from 'css-xpath';
+
 async function init() {
 
     const puppeteer = await setPuppeteer({
