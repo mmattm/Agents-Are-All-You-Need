@@ -18,7 +18,7 @@ async function init() {
 
     const btn = await findClosestElement(page, {
         cssSelector: 'body input',
-        containText: 'Google suche'
+        containText: 'Google suche' // or html
     });
 
     await btn.click();
