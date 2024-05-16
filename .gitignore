@@ -12,3 +12,6 @@ pnpm-lock.yaml
 .DS_Store
 examples/scraper_basic.js
 examples/scraper_advanced.js
+*.raw
+*.mp3
+*.wav
