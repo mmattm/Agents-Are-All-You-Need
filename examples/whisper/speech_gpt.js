@@ -64,6 +64,8 @@ import { generate_speech } from "../../utils.js";
       ],
     });
 
+    console.log("send audio transcription to GPT-4o");
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       max_tokens: 1024,
@@ -109,7 +111,7 @@ import { generate_speech } from "../../utils.js";
     }
 
     // Check if the amplitude exceeds the threshold
-    var threshold = 2000; // Set your desired threshold
+    var threshold = 2400; // Set your desired threshold
     //console.log("Max amplitude: " + maxAmplitude);
     if (maxAmplitude > threshold && !recording) {
       recording = true;
