@@ -117,9 +117,9 @@ export async function generate_speech(
   await playAudio();
 }
 
-function playAudio() {
+export function playAudio(file = "speech.mp3") {
   return new Promise((resolve, reject) => {
-    player.play("speech.mp3", function (err) {
+    player.play(file, function (err) {
       if (err) {
         //console.error("Error during audio playback:", err);
         reject(err);
