@@ -8,7 +8,6 @@ import inquirer from "inquirer";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import useActionViz from "./utils.actionviz.js";
-import { match } from "assert";
 
 puppeteer.use(StealthPlugin());
 
@@ -56,14 +55,26 @@ export async function setPuppeteer(options = {}) {
 
 export async function newWindow(browser, options) {
   const client = await browser.target().createCDPSession();
-  const { targetId } = await client.send('Target.createTarget', { url: 'about:blank', newWindow: true, background: false, ...options });
-  const target = await browser.waitForTarget(target => target._targetId === targetId);
+  const { targetId } = await client.send("Target.createTarget", {
+    url: "about:blank",
+    newWindow: true,
+    background: false,
+    ...options,
+  });
+  const target = await browser.waitForTarget(
+    (target) => target._targetId === targetId
+  );
   const page = await target.page();
 
   const setBounds = async (bounds) => {
-    const { windowId } = await client.send('Browser.getWindowForTarget', { targetId })
-    client.send('Browser.setWindowBounds', { windowId, bounds: { windowState: 'normal', ...bounds } });
-  }
+    const { windowId } = await client.send("Browser.getWindowForTarget", {
+      targetId,
+    });
+    client.send("Browser.setWindowBounds", {
+      windowId,
+      bounds: { windowState: "normal", ...bounds },
+    });
+  };
 
   await page.setBypassCSP(true); // bypass Content Security Policy
 
@@ -83,10 +94,10 @@ export /*async*/ function animate(fn, { fps = 60, customData = {} } = {}) {
       frameCount++;
       if (playing) return setTimeout(update, interval);
       resolve();
-    }
+    };
 
     update();
-  })
+  });
 }
 
 export async function generate_speech(
@@ -158,19 +169,24 @@ export async function sleep(ms) {
   return await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function findClosestElement(page, { multiple = false, cssSelector = "*", containText = "", ignoreInvisible = true, exactMatch = false }) {
+export async function findClosestElement(
+  page,
+  {
+    multiple = false,
+    cssSelector = "*",
+    containText = "",
+    ignoreInvisible = true,
+    exactMatch = false,
+  }
+) {
+  if (!exactMatch) containText = containText.toLowerCase().trim();
 
-  if (!exactMatch)
-    containText = containText.toLowerCase().trim();
-
-  const elems = await page.$$(cssSelector)
+  const elems = await page.$$(cssSelector);
 
   function getElem(e, { containText, ignoreInvisible, exactMatch }) {
-
     let text = e.outerHTML;
 
-    if (!exactMatch)
-      text = text.toLowerCase()
+    if (!exactMatch) text = text.toLowerCase();
 
     if (ignoreInvisible && !e.checkVisibility()) return;
     if (!text.includes(containText)) return;
@@ -186,13 +202,16 @@ export async function findClosestElement(page, { multiple = false, cssSelector =
   }
 
   let match = elems.map(async (e) => {
-
-    const res = await e.evaluate(getElem, { containText, ignoreInvisible, exactMatch });
+    const res = await e.evaluate(getElem, {
+      containText,
+      ignoreInvisible,
+      exactMatch,
+    });
 
     if (!res) return;
 
-    return { domDeepness: res.domDeepness, elem: e }
-  })
+    return { domDeepness: res.domDeepness, elem: e };
+  });
 
   match = await Promise.all(match);
   match = match.filter(Boolean);
@@ -200,7 +219,6 @@ export async function findClosestElement(page, { multiple = false, cssSelector =
   match = match.map((m) => m.elem);
 
   if (multiple) return match;
-
 
   match[0].evaluate((e) => {
     console.log(e);
@@ -242,9 +260,9 @@ export async function highlight_links(page) {
             rect.top >= 0 &&
             rect.left >= 0 &&
             rect.bottom <=
-            (window.innerHeight || document.documentElement.clientHeight) &&
+              (window.innerHeight || document.documentElement.clientHeight) &&
             rect.right <=
-            (window.innerWidth || document.documentElement.clientWidth)
+              (window.innerWidth || document.documentElement.clientWidth)
           );
         }
 
@@ -295,29 +313,28 @@ export async function waitForEvent(page, event) {
 }
 
 function lerp(start, stop, amount) {
-  return amount * (stop - start) + start
+  return amount * (stop - start) + start;
 }
 
 export async function zoomTo(page, targetZoom, { duration = 1 } = {}) {
-
-  const framesDuration = 60 * duration
+  const framesDuration = 60 * duration;
 
   const currentZoom = await page.evaluate(() => {
-    return parseFloat(document.body.style.zoom) || 100
-  })
+    return parseFloat(document.body.style.zoom) || 100;
+  });
 
   if (duration > 0)
     await animate(async ({ time, frameCount }) => {
-      const zoom = lerp(currentZoom, targetZoom, frameCount / framesDuration)
+      const zoom = lerp(currentZoom, targetZoom, frameCount / framesDuration);
 
       page.evaluate((zoom) => {
-        document.body.style.zoom = zoom + "%"
-      }, zoom)
+        document.body.style.zoom = zoom + "%";
+      }, zoom);
 
-      if (frameCount < framesDuration) return true
+      if (frameCount < framesDuration) return true;
     });
 
   await page.evaluate((zoom) => {
-    document.body.style.zoom = zoom + "%"
-  }, targetZoom)
+    document.body.style.zoom = zoom + "%";
+  }, targetZoom);
 }
