@@ -293,3 +293,31 @@ export async function waitForEvent(page, event) {
     });
   }, event);
 }
+
+function lerp(start, stop, amount) {
+  return amount * (stop - start) + start
+}
+
+export async function zoomTo(page, targetZoom, { duration = 1 } = {}) {
+
+  const framesDuration = 60 * duration
+
+  const currentZoom = await page.evaluate(() => {
+    return parseFloat(document.body.style.zoom) || 100
+  })
+
+  if (duration > 0)
+    await animate(async ({ time, frameCount }) => {
+      const zoom = lerp(currentZoom, targetZoom, frameCount / framesDuration)
+
+      page.evaluate((zoom) => {
+        document.body.style.zoom = zoom + "%"
+      }, zoom)
+
+      if (frameCount < framesDuration) return true
+    });
+
+  await page.evaluate((zoom) => {
+    document.body.style.zoom = zoom + "%"
+  }, targetZoom)
+}
