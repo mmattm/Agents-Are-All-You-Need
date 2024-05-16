@@ -33,6 +33,7 @@ import { generate_speech } from "../../utils.js";
   });
 
   let recording = false;
+  let firstSilence = false;
 
   var recordingMicInputStream = recordingMicInstance.getAudioStream();
   var monitoringMicInputStream = monitoringMicInstance.getAudioStream();
@@ -111,12 +112,19 @@ import { generate_speech } from "../../utils.js";
     }
 
     // Check if the amplitude exceeds the threshold
-    var threshold = 2400; // Set your desired threshold
+    var threshold = 1600; // Set your desired threshold
     //console.log("Max amplitude: " + maxAmplitude);
     if (maxAmplitude > threshold && !recording) {
+      if (!firstSilence) {
+        console.log("First record");
+        firstSilence = true;
+        recordingMicInstance.start();
+      } else {
+        recordingMicInstance.resume();
+      }
+
       recording = true;
       console.log("Audio level above threshold. start recording again...");
-      recordingMicInstance.resume();
     }
   });
 
@@ -124,7 +132,6 @@ import { generate_speech } from "../../utils.js";
     //console.log("Error in Monitoring Input Stream: " + err);
   });
 
-  recordingMicInstance.start();
   monitoringMicInstance.start();
 })();
 
