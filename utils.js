@@ -100,16 +100,18 @@ export /*async*/ function animate(fn, { fps = 60, customData = {} } = {}) {
   });
 }
 
-export async function generate_speech(
-  text,
+export async function generate_speech({
+  text = "",
   voice = "onyx",
-  filename = "speech.mp3"
-) {
+  filename = "speech.mp3",
+  speed = 1,
+}) {
   const speechFile = path.resolve("./" + filename);
   const mp3 = await openai.audio.speech.create({
     model: "tts-1",
     voice: voice,
     input: text,
+    speed: speed,
   });
   const buffer = Buffer.from(await mp3.arrayBuffer());
   await fs.promises.writeFile(speechFile, buffer);

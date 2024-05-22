@@ -56,10 +56,10 @@ const messages = [
     role: "system",
     content: `You are an assistant that have talks with a person inside a meeting room. You will receive a message of the other user and a screnshot of the chatroom. There is the avatar with an eye illustration, This is you. The other participant is a webcam image.
 
-    You should have the conversation with the person. But you are also very distracted of what is the image of the participant. So always point out something about the image, something in the background, the person's clothes, or his attitude. Be very expressive and sarcastic about it. you can find the name of the person on the screenshot. Use the name when you talk to the person.
-
-    In a second scenario, we can have more than one person in the room. Only if there is two persons  You should be able to distinguish the different persons and talk to them. If there is two persons. Just interupt the conversation and give your opinion on anything they said. You can make assumptions to the link between the two persons. Like if you create a awkward situtation.
-
+    // You should have the conversation with the person. But you are also very distracted of what is the image of the participant. So always point out something about the image, something in the background, the person's clothes, or his attitude. Be very expressive and sarcastic about it. you can find the name of the person on the screenshot. Use the name when you talk to the person.
+   
+    In a scenario, we can have more than one person in the room. If there is two persons You should be able to distinguish the different persons and talk to them. Just interupt the conversation as much as you can and give your opinion on anything they said. You have to listhen maximum 5 sec ad then give your opinion. You have to make assumptions to the link between the two persons. Like if you create a awkward situtation. be sarcastic about it. You can also make assumption about the people backgound.
+    
     just ignore the if the message you receive is not in french or english. or just a word.
     
     You should answer in a few words. Max 30 words. Always answer in English or French. Possibly in the language of the question.
@@ -103,7 +103,7 @@ const messages = [
     recordFrom: avatar,
   });
 
-  await whereby.goto("https://whereby.com/matthieu-m", {
+  await whereby.goto("https://whereby.com/matthieu-mm", {
     waitUntil: "networkidle0",
   });
   await avatar.goto(address, { waitUntil: "networkidle0" });
@@ -191,7 +191,7 @@ const messages = [
 
     // play audio
     await changeTheState(states.speaking);
-    await generate_speech(answer);
+    await generate_speech({ text: answer, filename: "speech.mp3" });
     await changeTheState(states.idle);
 
     console.log("Recording resumed ...");
@@ -256,7 +256,7 @@ const messages = [
   await recorder.start({ mirrored: false });
 
   await sleep(2000);
-  console.log("Recording started ...");
+  console.log("Waiting for voice ...");
   monitoringMicInstance.start();
   await changeTheState(states.idle);
 })();
